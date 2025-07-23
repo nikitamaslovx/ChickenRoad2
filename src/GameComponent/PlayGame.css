@@ -1,0 +1,46 @@
+/* .dino.jumping {
+    animation: jumpArc 0.3s ease-in-out forwards;
+  }
+
+@keyframes jumpArc {
+    0% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-80px); 
+    }
+    100% {
+      transform: translateY(0);
+    }
+  } */
+  
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+  }
+  .scroll-item {
+    scroll-snap-align: start;
+  }
+  
+  /* car come from top to bottom */
+@keyframes fireFall {
+  0% {
+    top: -80px;
+    opacity: 0;
+  }
+  100% {
+    top: calc(100% - 95px); /* adjust as per final position */
+    opacity: 1;
+  }
+}
+
+.fire-fall {
+  /* position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 80px;
+  z-index: 20; */
+  animation: fireFall 1s ease-out forwards;
+  /* pointer-events: none; */
+}
+
+

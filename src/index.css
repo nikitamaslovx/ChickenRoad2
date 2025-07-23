@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3490dc;
+  --color-secondary: #ffed4a;
+  --color-accent: #38c172;
+  /* ---------------------------- */
+  --color-mainBg: #3A3D50;
+  --color-mainBetBg: #161824;
+  --color-mainBlue: #042d56;
+  --color-boxColor: #042d56;
+  --color-boxColor: #042d56;
+  --color-selectedColor: #0d68ad;
+  --color-iconBackground: #428cdc;
+  --color-mainBlue: #063f7c;
+  --color-mainGradient: #084B93;
+  --color-hoverColor: #448ede;
+  --color-orange: #F54A00;
+  --color-textblue: #1183d3;
+  --color-grayBgMain: #4F5163;
+  --color-grayBgHover: #5E6171;
+  --color-parrot: #ffa200;
+
+  --text-sm: 18px;
+  --font-xsm: 14px;
+  --font-lg: 50px;
+  
+/* ------------------------------ */
+  --font-body: 'Roboto', sans-serif;
+  --font-heading: 'Poppins', sans-serif;
+
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 32px;
+
+  --animation-bounce: bounce 1s infinite;
+}
+
+input:-webkit-autofill {
+  background-color: transparent !important;
+  -webkit-box-shadow: 0 0 0 1000px #042d56 inset !important; /* Your bg-boxColor */
+  -webkit-text-fill-color: white !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+@theme {
+  --breakpoint-xxs: 390px
+  --breakpoint-xs: 30rem;
+  --breakpoint-2xl: 100rem;
+  --breakpoint-3xl: 120rem;
+  --breakpoint-md: 900px;
+  --breakpoint-lg: 1200px;
+  --breakpoint-2lg: 1500px;
+
+}
+
+/* Add to your CSS or global styles */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none;    /* Firefox */
+}
