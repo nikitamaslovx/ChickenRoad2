@@ -43,4 +43,19 @@
   /* pointer-events: none; */
 }
 
+@keyframes barrier-fall {
+  0% {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-barrier-fall {
+  animation: barrier-fall 0.7s ease-out forwards;
+}
+
 

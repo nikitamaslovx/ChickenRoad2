@@ -44,8 +44,24 @@ export default function Game() {
   const [profileRefresher, setProfileRefresher] = useState(false);
   const [winAmount, setWinAmount] = useState(0);
   const { get, post, put, del, error } = useApi();
-  const isSmallScreen = window.innerWidth <= 500;
-  const fragmentWidthVW = isSmallScreen ? 33.33 : 15;
+const isSmallScreen = window.innerWidth <= 500;
+const isLargerScreen = window.innerWidth >= 1500;
+const isLargeScreen = window.innerWidth >= 1020;
+const isBigScreen = window.innerWidth >= 700;
+const isMediumScreen = window.innerWidth >= 500;
+
+const fragmentWidthVW = isLargerScreen
+  ? 10
+  : isLargeScreen
+  ? 10
+  : isBigScreen
+  ? 28
+  : isMediumScreen
+  ? 20
+  : isSmallScreen
+  ? 32
+  : 10;
+
   // chicken sound
   // useEffect(() => {
   //   const audio = audioRef.current;
@@ -168,6 +184,7 @@ export default function Game() {
   const restartGame = () => {
     setDinoLandedIndex(null)
     setIslastSecondSegment(false);
+    localStorage.removeItem("redfragment");
     setScore(0);
     setFinalValue(0);
     if (containerRef.current) {

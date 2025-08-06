@@ -35,7 +35,7 @@ const GameControlPanel = ({
 }) => {
   // const [selectedAmount, setSelectedAmount] = useState(1);
   const [selectedAmount, setSelectedAmount] = useState(null);
-
+const [redFragmentStatus, setRedFragmentStatus] = useState(false);
   const { get, post, put, del, loading, error } = useApi();
   const [activeTab, setActiveTab] = useState({ type: 1 });
   const [showModal, setShowModal] = useState(false);
@@ -47,24 +47,68 @@ const GameControlPanel = ({
   // const amountOptions = [10, 20, 50, 100];
   const [amountOptions, setAmountOptions] = useState([]);
 
-  const fetchAmountOptions=async()=>{
+  // Function to check red fragment status from localStorage
+  const checkRedFragmentStatus = () => {
     try {
-      
+      const status = localStorage.getItem("redfragment");
+      const isRedFragment = status === "true" || status === true;
+      setRedFragmentStatus(isRedFragment);
+      return isRedFragment;
+    } catch (error) {
+      console.error("Error checking red fragment status:", error);
+      return false;
+    }
+  };
+
+  // Check red fragment status on component mount
+  useEffect(() => {
+    checkRedFragmentStatus();
+  }, []);
+
+  // Set up interval to continuously check red fragment status
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkRedFragmentStatus();
+    }, 1000); // Check every second
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Also check when localStorage might change (focus/visibility events)
+  useEffect(() => {
+    const handleFocus = () => checkRedFragmentStatus();
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        checkRedFragmentStatus();
+      }
+    };
+
+    window.addEventListener("focus", handleFocus);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  const fetchAmountOptions = async () => {
+    try {
       const response = await get(apis.bet_value);
-      console.log("res of amount options:",response.data.data)
+      console.log("res of amount options:", response.data.data);
       const data = response?.data?.data;
       if (Array.isArray(data)) {
         const values = data.map((item) => item.value); // Extract just the `value`
         setAmountOptions(values); // Save to state
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
-  useEffect(()=>{
-    fetchAmountOptions()
-  },[])
+  useEffect(() => {
+    fetchAmountOptions();
+  }, []);
 
   const handleMin = () => {
     setCurrentAmount(minMaxValues.min);
@@ -75,7 +119,6 @@ const GameControlPanel = ({
     setCurrentAmount(minMaxValues.max);
     setSelectedAmount(null);
   };
-  
 
   const handleAmountClick = (amt) => {
     setSelectedAmount(amt);
@@ -116,7 +159,7 @@ const GameControlPanel = ({
     getMultiplier();
   }, []);
 
-  const bethandler = async() => {
+  const bethandler = async () => {
     // ✅ Check for userid before anything else
     if (!userid) {
       toast?.warn("Please log in first.");
@@ -124,26 +167,31 @@ const GameControlPanel = ({
       return;
     }
 
-      // ✅ Get wallet balance before playing
-  try {
-    const res = await get(`${apis?.profile}${userid}`)
-    // console.log("res for play check:", typeof res.data.profile.amount);
-    // const balance = res.data.profile.amount;
-    const balance = parseFloat(res.data.profile.amount);
-    console.log("current amount:", typeof balance);
-    const amountToPlay = parseFloat(currentAmount);
-    console.log("current amount:", typeof amountToPlay);
-    if (amountToPlay > balance) {
-      toast?.error("Insufficient wallet balance.");
-      return;
+    if (currentAmount<minMaxValues.min){
+      toast?.warn(`Minimum bet amount ${minMaxValues.min}`);
+      return
     }
-  } catch (err) {
-    // console.error("Error fetching balance:", err);
-    toast?.error("Could not verify balance. Try again.");
-    return;
-  }
+ 
+      // ✅ Get wallet balance before playing
+      try {
+        const res = await get(`${apis?.profile}${userid}`);
+        // console.log("res for play check:", typeof res.data.profile.amount);
+        // const balance = res.data.profile.amount;
+        const balance = parseFloat(res.data.profile.amount);
+        console.log("current amount:", typeof balance);
+        const amountToPlay = parseFloat(currentAmount);
+        console.log("current amount:", typeof amountToPlay);
+        if (amountToPlay > balance) {
+          toast?.error("Insufficient wallet balance.");
+          return;
+        }
+      } catch (err) {
+        // console.error("Error fetching balance:", err);
+        toast?.error("Could not verify balance. Try again.");
+        return;
+      }
 
-  // payload
+    // payload
     const payload = {
       user_id: userid,
       game_id: 19,
@@ -171,7 +219,7 @@ const GameControlPanel = ({
   };
 
   const [minMaxValues, setMinMaxValues] = useState({ min: 1, max: 150 });
-   
+
   const values = async () => {
     try {
       const res = await get(`${apis?.gameRule_request}`);
@@ -190,10 +238,10 @@ const GameControlPanel = ({
       console.log(error);
     }
   };
-  
-  useEffect(()=>{
-    values()
-  },[])
+
+  useEffect(() => {
+    values();
+  }, []);
   // values()
   return (
     <div className="bg-mainBetBg p-2 lg:px-8 lg:py-10  w-full ">
@@ -353,6 +401,7 @@ const GameControlPanel = ({
           {gameStarted && (
             <button
               onClick={cashoutHandlerByButton}
+              disabled={redFragmentStatus}
               className="w-full bg-yellow-500 text-black font-bold text-[20px] px-1 mt-1 md:mt-0 md:py-9 shadow-lg py-3 rounded-2xl text-center cursor-pointer"
             >
               CASH OUT <br />
@@ -370,7 +419,10 @@ const GameControlPanel = ({
                   }, 1000);
                 }
               }}
-              disabled={isProcessingFragment || goButtonCooldown}
+              
+              disabled={
+                isProcessingFragment || goButtonCooldown || redFragmentStatus
+              }
               className={`w-full text-black font-bold rounded-2xl text-xl py-3 md:py-9 mt-1 md:mt-0 shadow-2xl text-center cursor-pointer transition-all duration-300 ${
                 isProcessingFragment || goButtonCooldown
                   ? "bg-green-600 opacity-70 cursor-not-allowed"
