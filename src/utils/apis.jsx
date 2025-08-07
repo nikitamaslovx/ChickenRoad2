@@ -1,7 +1,7 @@
 // export const baseUrlUsaWin = "https://root.chicken-road.cash";
-export const baseUrlUsaWin = "https://chickenroadadminfc.codingjourney.in";
+export const baseUrlUsaWin = "https://chikenroadadmin.mobileappdemo.net";
 // export const referral_url = "https://root.chicken-road.cash";
-export const referral_url = "https://chickenroadadminfc.codingjourney.in";
+export const referral_url = "https://chikenroadadmin.mobileappdemo.net";
 export const configModalUsaWin = `${baseUrlUsaWin}/api/`;
 export const configModalApk = `${baseUrlUsaWin}/apk/`;
 export const configModalBanner = `${baseUrlUsaWin}/public/api/`;

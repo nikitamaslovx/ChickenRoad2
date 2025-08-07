@@ -13,7 +13,9 @@ const YourDepositHistoryModal = ({ title, onClose }) => {
 
   const fetchData = async () => {
     try {
+      console.log(`api of drposit history: ${apis?.deposit_history}${userid}`);
       const res = await get(`${apis?.deposit_history}${userid}`);
+      console.log("Deposit History Response:", res);
       setHistory(res?.data?.data || []);
     } catch (error) {
       console.error("Error fetching deposit history:", error);
@@ -49,10 +51,11 @@ const YourDepositHistoryModal = ({ title, onClose }) => {
         </div>
 
         {/* Table Header */}
-        <div className="grid grid-cols-3 px-6 text-sm text-gray-300 pb-2">
+        <div className="grid grid-cols-4 px-6 text-sm text-gray-300 pb-2">
           <div>Date</div>
           <div>Amount</div>
           <div>Status</div>
+          <div>Bouns</div>
         </div>
 
         {/* Table Rows */}
@@ -61,7 +64,7 @@ const YourDepositHistoryModal = ({ title, onClose }) => {
             history.map((item, index) => (
               <div
                 key={index}
-                className="grid grid-cols-3 items-center bg-[#44475A] rounded-md text-white py-2 px-2 my-2 text-xs"
+                className="grid grid-cols-4 items-center bg-[#44475A] rounded-md text-white py-2 px-2 my-2 text-xs"
               >
                 <div>{item.created_at}</div>
                 <div className="flex items-center gap-1">
@@ -69,6 +72,10 @@ const YourDepositHistoryModal = ({ title, onClose }) => {
                   <span>{item.amount}</span>
                 </div>
                 <div>{getStatusLabel(item.status)}</div>
+                <div className="flex items-center gap-1">
+                  {currency}
+                  <span>{item.bonus_amount}</span>
+                </div>
               </div>
             ))
           ) : (
