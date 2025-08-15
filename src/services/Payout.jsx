@@ -172,7 +172,11 @@ import { FaTimes } from "react-icons/fa";
 import upi from "../assets/Payment/upi.png";
 import FirstWithdrawPopup from "../Modal/FirstWithdrawPopup";
 
-const Payout = ({ isOpen, onClose }) => {
+const Payout = ({
+  isOpen,
+  onClose,
+  setProfileRefresher,
+}) => {
   if (!isOpen) return null;
 
   const userid = localStorage.getItem("userid");
@@ -185,33 +189,29 @@ const Payout = ({ isOpen, onClose }) => {
 
   const fileInputRef = useRef(null);
 
-    const profileHandler = () => {
-      get(`${apis?.profile}${userid}`)
-        .then((res) => {
-          console.log(
-            "response profile for withdraw",
-            res.data.profile
-          );
-          if (res?.data?.status === true) {
-            const balance = res.data.profile.amount;
-            setAvailableAmount(balance);
-          }
-          
-          if (res?.data?.status === true) {
-            console.log("profile api close");
-            // if (typeof setProfileRefresher === "function") {
-            //   setProfileRefresher(true);
-            // }
-            // onClose();
-          }
-        })
-        .catch(console.error);
-    };
+  const profileHandler = () => {
+    get(`${apis?.profile}${userid}`)
+      .then((res) => {
+        console.log("response profile for withdraw", res.data.profile);
+        if (res?.data?.status === true) {
+          const balance = res.data.profile.amount;
+          setAvailableAmount(balance);
+        }
 
- useEffect(()=>{
-      profileHandler()
-    },[])
+        if (res?.data?.status === true) {
+          console.log("profile api close");
+          // if (typeof setProfileRefresher === "function") {
+          //   setProfileRefresher(true);
+          // }
+          // onClose();
+        }
+      })
+      .catch(console.error);
+  };
 
+  useEffect(() => {
+    profileHandler();
+  }, []);
 
   const formik = useFormik({
     // initialValues: {
@@ -283,17 +283,18 @@ const Payout = ({ isOpen, onClose }) => {
         const res = await axios.post(`${apis?.withdrawal_request}`, payload);
         toast.success("Form submitted successfully");
         resetForm();
+        profileHandler(); // Refresh profile data
+        setProfileRefresher(true);
         setPreview("");
         if (fileInputRef.current) fileInputRef.current.value = null;
         onClose(); // close modal if needed
       } catch (err) {
         console.error(err);
-        alert("Failed to submit form");
+        toast.error("Failed to submit form");
       }
     },
   });
   // console.log("Formik errors:", formik.errors);
-
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];

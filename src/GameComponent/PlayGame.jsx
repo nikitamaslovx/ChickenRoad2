@@ -1755,7 +1755,7 @@ export default function PlayGame({
       const timer = setTimeout(() => {
         localStorage.removeItem("redfragment");
         console.log("🔴 Red fragment localStorage removed after 1 second");
-      }, 2500);
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
@@ -1791,7 +1791,7 @@ export default function PlayGame({
 
       setTimeout(() => {
         restartGame();
-      }, 2500);
+      }, 1000);
     }
   }, [
     dinoIndex,
@@ -1807,16 +1807,16 @@ export default function PlayGame({
       setChickenLandingTime(landingTime);
       setIsChickenProtected(false);
 
-      console.log(
-        `🐔 Chicken landed on fragment ${dinoIndex} at ${landingTime}`
-      );
+      // console.log(
+      //   `🐔 Chicken landed on fragment ${dinoIndex} at ${landingTime}`
+      // );
 
       // Set protection after 500ms
       const protectionTimer = setTimeout(() => {
         setIsChickenProtected(true);
-        console.log(
-          `🛡️ Chicken is now PROTECTED on fragment ${dinoIndex} (500ms passed)`
-        );
+        // console.log(
+        //   `🛡️ Chicken is now PROTECTED on fragment ${dinoIndex} (500ms passed)`
+        // );
       }, 500);
 
       return () => clearTimeout(protectionTimer);
@@ -1847,7 +1847,7 @@ export default function PlayGame({
       if (allowedFragments.length > 0) {
         const randomIndex =
           allowedFragments[Math.floor(Math.random() * allowedFragments.length)];
-        console.log("🚗 Random Car spawning at fragment", randomIndex);
+        // console.log("🚗 Random Car spawning at fragment", randomIndex);
 
         setActiveCars((prev) => ({
           ...prev,
@@ -2168,11 +2168,11 @@ export default function PlayGame({
     if (difficultyArray?.multiplier?.length > 0) {
       console.log("🎯 All multipliers:", difficultyArray);
     }
-  }, [difficultyArray]);
+  }, [resetCoinsTrigger, difficultyArray]);
 
   // ✅ CORRECTED: Handle car animation completion
   const handleCarAnimationComplete = (fragmentIndex, carData) => {
-    console.log(`🚗 Car animation completed at fragment ${fragmentIndex}`);
+    // console.log(`🚗 Car animation completed at fragment ${fragmentIndex}`);
 
     // Remove from active cars and cars in motion
     setActiveCars((prev) => {
@@ -2214,7 +2214,7 @@ export default function PlayGame({
       }
     } else {
       // Car reached fragment where chicken is not present
-      console.log(`🚗 Car passed through empty fragment ${fragmentIndex}`);
+      // console.log(`🚗 Car passed through empty fragment ${fragmentIndex}`);
     }
   };
 
@@ -2253,7 +2253,7 @@ export default function PlayGame({
         >
           {dinoIndex === null || dinoIndex === 0 ? (
             <img
-              className={`max-w-[160px] sm:max-w-[220px] md:max-w-[320px]  lg:max-w-[120px] 2lg:max-w-[180px] h-auto object-contain`}
+              className={`max-w-[160px] sm:max-w-[220px] md:max-w-[320px] xlg:max-w-[220px]  lg:max-w-[120px] 2lg:max-w-[180px] h-auto object-contain`}
               src={cuttedChicken}
               alt="cutted Chicken"
               style={{ transform: "translateX(20px)" }}
@@ -2265,14 +2265,14 @@ export default function PlayGame({
                 <motion.img
                   src={barrier}
                   alt="barrier"
-                  className="-mb-14 lg:-mb-12 w-[115px] xsm3:w-[120px] xsm2:w-[130px] xsm:w-[110px] xsm:ml-1 sm:ml-4 sm:w-[160px] md:w-[200px] md:ml-10 md:-mb-16 2lg:w-[150px] 2lg:ml-0 2lg:-mb-4"
+                  className="-mb-14 lg:-mb-12 w-[115px] xsm3:w-[120px] xsm2:w-[130px] xsm:w-[110px] xsm:ml-1 sm:ml-4 sm:w-[160px] md:w-[200px] xlg:w-[140px] 2lg:w-[150px] md:ml-10 xlg:ml-6 md:-mb-16 2lg:ml-0 2lg:-mb-4"
                   initial={{ y: -100, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
                 />
               )}
               <img
-                className={`max-w-[150px] sm:max-w-[220px] md:max-w-[320px] lg:max-w-[120px] 2lg:max-w-[180px] h-auto object-contain -ml-1 mt-16 `}
+                className={`max-w-[150px] sm:max-w-[220px] md:max-w-[320px] lg:max-w-[120px] xlg:max-w-[220px]  2lg:max-w-[180px] h-auto object-contain -ml-1 mt-16 `}
                 ref={chickenRef}
                 src={ChickenGif}
                 alt="Chicken"
@@ -2465,7 +2465,7 @@ export default function PlayGame({
                       <img
                         src={barrier}
                         alt="barrier"
-                        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-1/2 -mt-12 sm:-mt-[90px] md:-mt-36 w-[115px] xsm3:w-[120px] xsm2:w-[130px] xsm:w-32 sm:w-[200px] -ml-2 md:w-[280px] 2lg:top-68 "
+                        className="absolute left-1/2 -translate-x-1/2 -translate-y-1/2 top-1/2 -mt-12 sm:-mt-[90px] md:-mt-36 xlg:-mt-24 2lg:-mt-36 w-[115px] xsm3:w-[120px] xsm2:w-[130px] xsm:w-32 sm:w-[200px] -ml-2 md:w-[280px]  2lg:top-68 "
                       />
                     )}
                     <motion.div

@@ -44,23 +44,23 @@ export default function Game() {
   const [profileRefresher, setProfileRefresher] = useState(false);
   const [winAmount, setWinAmount] = useState(0);
   const { get, post, put, del, error } = useApi();
-const isSmallScreen = window.innerWidth <= 500;
-const isLargerScreen = window.innerWidth >= 1500;
-const isLargeScreen = window.innerWidth >= 1020;
-const isBigScreen = window.innerWidth >= 700;
-const isMediumScreen = window.innerWidth >= 500;
+  const isSmallScreen = window.innerWidth <= 500;
+  const isLargerScreen = window.innerWidth >= 1500;
+  const isLargeScreen = window.innerWidth >= 1020;
+  const isBigScreen = window.innerWidth >= 700;
+  const isMediumScreen = window.innerWidth >= 500;
 
-const fragmentWidthVW = isLargerScreen
-  ? 10
-  : isLargeScreen
-  ? 10
-  : isBigScreen
-  ? 28
-  : isMediumScreen
-  ? 20
-  : isSmallScreen
-  ? 32
-  : 10;
+  const fragmentWidthVW = isLargerScreen
+    ? 10
+    : isLargeScreen
+    ? 10
+    : isBigScreen
+    ? 28
+    : isMediumScreen
+    ? 20
+    : isSmallScreen
+    ? 32
+    : 10;
 
   // chicken sound
   // useEffect(() => {
@@ -180,11 +180,50 @@ const fragmentWidthVW = isLargerScreen
     return i >= 1 ? parseFloat(base) : null;
   };
 
-    const [dinoLandedIndex, setDinoLandedIndex] = useState(null);
+  const [dinoLandedIndex, setDinoLandedIndex] = useState(null);
+  const getMultiplier = () => {
+    get(`${apis?.chickenMultplier}`)
+      .then((res) => {
+        if (res?.data?.success === true) {
+          setDifficulty(res?.data?.data);
+          setDifficultyArray(res?.data?.data[0]);
+        }
+      })
+      .catch(console.error);
+  };
+
+  useEffect(() => {
+    getMultiplier();
+  }, []);
+
+  // ✅ Fetch only roast_multiplier on restart
+const updateRoastMultiplier = () => {
+  get(`${apis?.chickenMultplier}?user_id=${userid}`)
+    .then((res) => {
+      if (res?.data?.success === true) {
+        const data = res?.data?.data || [];
+        const currentModeData = data.find(
+          (item) => item?.type === activeDifficulty
+        );
+
+        if (currentModeData) {
+          setDifficultyArray((prev) => ({
+            ...prev,
+            roast_multiplier: currentModeData.roast_multiplier,
+          }));
+        }
+      }
+    })
+    .catch(console.error);
+};
+
+
   const restartGame = () => {
-    setDinoLandedIndex(null)
+    setDinoLandedIndex(null);
     setIslastSecondSegment(false);
     localStorage.removeItem("redfragment");
+    // getMultiplier();
+    updateRoastMultiplier();
     setScore(0);
     setFinalValue(0);
     if (containerRef.current) {
@@ -267,15 +306,13 @@ const fragmentWidthVW = isLargerScreen
       });
     }
   };
-  
+
   const [showModalLogin, setShowModalLogin] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isProcessingFragment, setIsProcessingFragment] = useState(false);
 
-
   return (
     <div className="h-screen flex flex-col  bg-black overflow-y-hidden ">
-     
       <audio ref={audioRefMusic} src={bg_music} loop preload="auto" />
       <div className="h-12 ">
         <GameSection

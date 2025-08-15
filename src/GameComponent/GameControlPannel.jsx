@@ -1,6 +1,3 @@
-
-
-
 import { div } from "framer-motion/client";
 import { useEffect, useRef, useState } from "react";
 import { currency } from "../utils/keys";
@@ -35,7 +32,7 @@ const GameControlPanel = ({
 }) => {
   // const [selectedAmount, setSelectedAmount] = useState(1);
   const [selectedAmount, setSelectedAmount] = useState(null);
-const [redFragmentStatus, setRedFragmentStatus] = useState(false);
+  const [redFragmentStatus, setRedFragmentStatus] = useState(false);
   const { get, post, put, del, loading, error } = useApi();
   const [activeTab, setActiveTab] = useState({ type: 1 });
   const [showModal, setShowModal] = useState(false);
@@ -43,6 +40,7 @@ const [redFragmentStatus, setRedFragmentStatus] = useState(false);
   const [modalStyle, setModalStyle] = useState({});
   const [goButtonCooldown, setGoButtonCooldown] = useState(false);
   const userid = localStorage.getItem("userid");
+  const [isActionRunning, setIsActionRunning] = useState(false);
 
   // const amountOptions = [10, 20, 50, 100];
   const [amountOptions, setAmountOptions] = useState([]);
@@ -52,6 +50,7 @@ const [redFragmentStatus, setRedFragmentStatus] = useState(false);
     try {
       const status = localStorage.getItem("redfragment");
       const isRedFragment = status === "true" || status === true;
+      // alert("red fragment status", isRedFragment);
       setRedFragmentStatus(isRedFragment);
       return isRedFragment;
     } catch (error) {
@@ -161,35 +160,36 @@ const [redFragmentStatus, setRedFragmentStatus] = useState(false);
 
   const bethandler = async () => {
     // ✅ Check for userid before anything else
+    const userid = localStorage.getItem("userid");
     if (!userid) {
       toast?.warn("Please log in first.");
       setShowLoginModal(true);
       return;
     }
 
-    if (currentAmount<minMaxValues.min){
+    if (Number(currentAmount) < Number(minMaxValues.min)) {
       toast?.warn(`Minimum bet amount ${minMaxValues.min}`);
-      return
+      return;
     }
- 
-      // ✅ Get wallet balance before playing
-      try {
-        const res = await get(`${apis?.profile}${userid}`);
-        // console.log("res for play check:", typeof res.data.profile.amount);
-        // const balance = res.data.profile.amount;
-        const balance = parseFloat(res.data.profile.amount);
-        console.log("current amount:", typeof balance);
-        const amountToPlay = parseFloat(currentAmount);
-        console.log("current amount:", typeof amountToPlay);
-        if (amountToPlay > balance) {
-          toast?.error("Insufficient wallet balance.");
-          return;
-        }
-      } catch (err) {
-        // console.error("Error fetching balance:", err);
-        toast?.error("Could not verify balance. Try again.");
+
+    // ✅ Get wallet balance before playing
+    try {
+      const res = await get(`${apis?.profile}${userid}`);
+      // console.log("res for play check:", typeof res.data.profile.amount);
+      // const balance = res.data.profile.amount;
+      const balance = parseFloat(res.data.profile.amount);
+      console.log("current amount:", typeof balance);
+      const amountToPlay = parseFloat(currentAmount);
+      console.log("current amount:", typeof amountToPlay);
+      if (amountToPlay > balance) {
+        toast?.error("Insufficient wallet balance.");
         return;
       }
+    } catch (err) {
+      // console.error("Error fetching balance:", err);
+      toast?.error("Could not verify balance. Try again.");
+      return;
+    }
 
     // payload
     const payload = {
@@ -243,6 +243,26 @@ const [redFragmentStatus, setRedFragmentStatus] = useState(false);
     values();
   }, []);
   // values()
+const [cashoutInProgress, setCashoutInProgress] = useState(false);
+
+const cashoutHandlerByButtonWrapper = async () => {
+  // alert("cashout 2", redFragmentStatus);
+  const isRedActive = checkRedFragmentStatus();
+  if (isRedActive) {
+    // alert("You cannot cash out while red fragment is active.");
+    // toast.error("You cannot cash out while red fragment is active.");
+    return; // Stop right here
+  }
+     if (cashoutInProgress) return; // Already processing, ignore click
+
+  setCashoutInProgress(true);
+  try {
+    await cashoutHandlerByButton(); // Original function
+  } finally {
+    setCashoutInProgress(false); // Unlock after everything done
+  }
+};
+
   return (
     <div className="bg-mainBetBg p-2 lg:px-8 lg:py-10  w-full ">
       <div className="md:flex items-center justify-between bg-[#393c52] border-accent/10 border-2 h-full rounded-2xl p-1 md:p-3 lg:p-5 gap-2 lg:gap-4 2xl:gap-6 w-full">
@@ -400,40 +420,89 @@ const [redFragmentStatus, setRedFragmentStatus] = useState(false);
         >
           {gameStarted && (
             <button
-              onClick={cashoutHandlerByButton}
-              disabled={redFragmentStatus}
+              // onClick={cashoutHandlerByButtonWrapper}
+              onClick={() => {
+                if (!redFragmentStatus) {
+                  // alert("casshout 1", redFragmentStatus);
+                  cashoutHandlerByButtonWrapper();
+                }
+                else{
+                  // alert("You cannot cash out while red fragment is active.");
+                  return
+                }
+              }}
+              disabled={
+                cashoutInProgress || // lock during process
+                isActionRunning ||
+                isProcessingFragment ||
+                goButtonCooldown ||
+                redFragmentStatus
+              }
               className="w-full bg-yellow-500 text-black font-bold text-[20px] px-1 mt-1 md:mt-0 md:py-9 shadow-lg py-3 rounded-2xl text-center cursor-pointer"
             >
               CASH OUT <br />
               {currency} {finalValue}
             </button>
           )}
+
           {gameStarted ? (
             <button
               onClick={() => {
-                if (!goButtonCooldown) {
-                  setGoButtonCooldown(true);
+                  const isRedActive = checkRedFragmentStatus();
+                  if (isRedActive) {
+                    // alert("You cannot go forward while red fragment is active.");
+                    // toast.error(
+                    //   "You cannot go forward while red fragment is active."
+                    // );
+                    return; // Stop right here
+                  }
+                if (
+                  isActionRunning ||
+                  isProcessingFragment ||
+                  goButtonCooldown ||
+                  redFragmentStatus
+                )
+                  return; // ⬅️ Agar pehla action chal raha hai to ignore click
+
+                setIsActionRunning(true); // ⬅️ Ab action start
+
+                setGoButtonCooldown(true);
+
+                setTimeout(() => {
                   onPlay();
+
                   setTimeout(() => {
                     setGoButtonCooldown(false);
-                  }, 1000);
-                }
+                    setIsActionRunning(false); // ⬅️ Action complete hone par reset
+                  }, 800);
+                }, 1100);
               }}
-              
               disabled={
-                isProcessingFragment || goButtonCooldown || redFragmentStatus
+                isActionRunning ||
+                isProcessingFragment ||
+                goButtonCooldown ||
+                redFragmentStatus
               }
               className={`w-full text-black font-bold rounded-2xl text-xl py-3 md:py-9 mt-1 md:mt-0 shadow-2xl text-center cursor-pointer transition-all duration-300 ${
-                isProcessingFragment || goButtonCooldown
+                isActionRunning || isProcessingFragment || goButtonCooldown
                   ? "bg-green-600 opacity-70 cursor-not-allowed"
                   : "bg-green-500 hover:bg-green-600"
               }`}
             >
-              {goButtonCooldown || isProcessingFragment ? "Go" : "Go"}
+              Go
             </button>
           ) : (
             <button
-              onClick={bethandler}
+              onClick={() => {
+                if (isActionRunning) return; // Block if already running
+                setIsActionRunning(true);
+
+                bethandler(); // No need to wait for completion
+                setTimeout(() => {
+                  setIsActionRunning(false);
+                }, 1000); // 1 second cooldown
+              }}
+              disabled={isActionRunning}
               className="w-full bg-green-500 hover:bg-green-600 text-white font-extrabold text-xl px-1 mt-3 md:mt-0 md:py-12 shadow-2xl py-3 rounded-2xl text-center cursor-pointer"
             >
               Play
@@ -446,7 +515,6 @@ const [redFragmentStatus, setRedFragmentStatus] = useState(false);
 };
 
 export default GameControlPanel;
-
 
 // import { useEffect, useRef, useState } from "react";
 // import { currency } from "../utils/keys";
@@ -503,7 +571,6 @@ export default GameControlPanel;
 //     setCurrentAmount(minMaxValues.max);
 //     setSelectedAmount(null);
 //   };
-  
 
 //   const handleAmountClick = (amt) => {
 //     setSelectedAmount(amt);
@@ -559,7 +626,7 @@ export default GameControlPanel;
 //   useEffect(() => {
 //     if (userid) getUserBalance();
 //   }, []);
-  
+
 //   const bethandler = () => {
 //     // ✅ Check for userid before anything else
 //     if (!userid) {
@@ -602,7 +669,7 @@ export default GameControlPanel;
 //   };
 
 //   const [minMaxValues, setMinMaxValues] = useState({ min: 1, max: 150 });
-   
+
 //   const values = async () => {
 //     try {
 //       const res = await get(`${apis?.gameRule_request}`);
@@ -621,7 +688,7 @@ export default GameControlPanel;
 //       console.log(error);
 //     }
 //   };
-  
+
 //   useEffect(()=>{
 //     values()
 //   },[])

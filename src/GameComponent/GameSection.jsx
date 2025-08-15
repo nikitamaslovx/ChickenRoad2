@@ -64,6 +64,16 @@ export default function GameSection({
     betHisotry();
     profileHandler();
   }, []);
+
+  useEffect(() => {
+    if (userid) {
+      setProfileData(null); // clear old data
+      betHisotry();
+      profileHandler();
+    }
+  }, [userid]);
+
+  
   useEffect(() => {
     if (profileRefresher) {
       profileHandler();

@@ -333,9 +333,10 @@ const PayinModal = ({ isOpen, onClose }) => {
       amount: Yup.string()
         .matches(/^\d+$/, "Amount must contain only digits")
         .required("Amount is required"),
-      utr_no: Yup.string().required("UTR number is required"), // renamed from screenshot
+      utr_no: Yup.string()
+        .matches(/^\d+$/, "UTR number must contain only digits")
+        .required("UTR number is required"), // renamed from screenshot
     }),
-
 
     onSubmit: async (values, { resetForm }) => {
       const payload = {
@@ -344,7 +345,7 @@ const PayinModal = ({ isOpen, onClose }) => {
         type,
       };
 
-      console.log("recharge  payload:", payload)
+      console.log("recharge  payload:", payload);
       try {
         const res = await axios.post(`${apis?.add_amount}`, payload);
         toast.success("Recharge submitted successfully");
@@ -510,11 +511,15 @@ const PayinModal = ({ isOpen, onClose }) => {
                 type="text"
                 name="utr_no"
                 value={formik.values.utr_no}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  let value = e.target.value.replace(/\D/g, ""); // remove non-digits
+                  formik.setFieldValue("utr_no", value);
+                }}
                 onBlur={formik.handleBlur}
                 placeholder="Enter UTR number"
                 className="w-full px-4 py-2 rounded-lg bg-[#4c5169] text-white border border-gray-500 focus:outline-none"
               />
+
               {formik.touched.utr_no && formik.errors.utr_no && (
                 <p className="text-red-400 text-xs mt-1">
                   {formik.errors.utr_no}

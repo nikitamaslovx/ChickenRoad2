@@ -59,6 +59,7 @@ input:-webkit-autofill {
   --breakpoint-sm: 720px;
   --breakpoint-md: 900px;
   --breakpoint-lg: 1200px;
+  --breakpoint-xlg: 1280px;
   --breakpoint-2lg: 1500px;
 
 }

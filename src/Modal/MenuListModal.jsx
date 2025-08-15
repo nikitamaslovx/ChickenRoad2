@@ -15,6 +15,7 @@ import { apis, referral_url } from "../utils/apis";
 import FirstWithdrawPopup from "./FirstWithdrawPopup";
 import YourDepositHistoryModal from "./YourDepositHistoryModal";
 import YourWithdrawHistoryModal from "./YourWithdrawHistoryModal"
+import { BiSupport } from "react-icons/bi"; 
 import Login from "../Auth/Login";
 function MenuListModal({
   isOpen,
@@ -48,6 +49,7 @@ function MenuListModal({
 
   const handleLogout = () => {
     localStorage.removeItem("userid");
+    
     // toast.success("Logged out successfully");
     restartGame();
     onClose(); // close the modal
@@ -64,10 +66,15 @@ function MenuListModal({
       const res = await get(`${apis?.profile}${userid}`);
       const firstRecharge = res?.data?.profile?.first_recharge;
 
-      if (firstRecharge === 1 || firstRecharge === 2) {
+      if (
+        firstRecharge === 1 ||
+        firstRecharge === 2 ||
+        firstRecharge === 3 ||
+        firstRecharge === 0
+      ) {
         setShowPayOutModal(true);
       } else {
-        setShowFirstWithdrawPopup(true);
+        setShowFirstWithdrawPopup(false);
       }
     } catch (error) {
       console.error("Failed to fetch profile for withdraw check", error);
@@ -318,6 +325,36 @@ function MenuListModal({
             </button>
           </div>
 
+          {/* support - telegram */}
+          <div className="pt-2 flex items-center justify-between w-full">
+            <button
+              onClick={() => {
+                const shareData = {
+                  title: "Play Chicken Road Game",
+                  text: "Check out this exciting Chicken Road Game and earn rewards! 🐔🔥",
+                  url: profileData.support[0].link, // Replace this with your actual app/game link
+                };
+
+                if (navigator.share) {
+                  // navigator
+                  //   .share(shareData)
+                  //   .catch((error) => console.error("Sharing failed:", error));
+                  window.open(shareData.url, "_blank");
+                } else {
+                  // Fallback: copy to clipboard
+                  navigator.clipboard.writeText(shareData.url);
+                  alert("Link copied to clipboard!");
+                }
+              }}
+              className="flex w-full items-center gap-3"
+            >
+              <p>
+                <BiSupport size={15} />
+              </p>
+              <p>Support</p>
+            </button>
+          </div>
+
           <div className="pt-2 flex items-center justify-between w-full">
             <button
               onClick={handleLogout}
@@ -338,6 +375,7 @@ function MenuListModal({
       {showPayOutModal && (
         <PayOutModal
           isOpen={showPayOutModal}
+          setProfileRefresher={setProfileRefresher}
           onClose={() => setShowPayOutModal(false)}
         />
       )}
