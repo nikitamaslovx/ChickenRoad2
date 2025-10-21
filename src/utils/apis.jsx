@@ -1,5 +1,5 @@
 // export const baseUrlUsaWin = "https://root.chicken-road.cash";
-export const baseUrlUsaWin = "https://root.chiekenroads2.club";
+export const baseUrlUsaWin = "http://localhost:3001";
 // export const referral_url = "https://root.chicken-road.cash";
 export const referral_url = "https://chiekenroads2.club";
 export const configModalUsaWin = `${baseUrlUsaWin}/api/`;
@@ -27,4 +27,3 @@ export const apis = {
   banner_image: `${configModalBanner}getBanners`,
   bet_value: `${configModalBanner}bet_values`,
 };
-

@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChickenRoad2 Proxy Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .status.online {
+            background: #10b981;
+            color: white;
+        }
+
+        .status.offline {
+            background: #ef4444;
+            color: white;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h3 {
+            color: #764ba2;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .stat:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: #666;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .toggle-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .toggle-item label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #10b981;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .logs {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid #334155;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .log-time {
+            color: #94a3b8;
+            margin-right: 10px;
+        }
+
+        .log-method {
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .log-path {
+            color: #60a5fa;
+        }
+
+        .log-status {
+            float: right;
+        }
+
+        .log-status.success {
+            color: #10b981;
+        }
+
+        .log-status.error {
+            color: #ef4444;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .endpoint-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .endpoint-item {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .endpoint-method {
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.85em;
+        }
+
+        .method-get {
+            background: #10b981;
+            color: white;
+        }
+
+        .method-post {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .method-put {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .method-delete {
+            background: #ef4444;
+            color: white;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .pulse {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎮 ChickenRoad2 Proxy Dashboard</h1>
+            <p>Управление и мониторинг proxy-сервера</p>
+            <div class="status online" id="serverStatus">
+                <span class="pulse">●</span> Server Online
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="grid">
+            <!-- Server Stats -->
+            <div class="card">
+                <h2>📊 Статистика</h2>
+                <div class="stat">
+                    <span class="stat-label">Всего запросов</span>
+                    <span class="stat-value" id="totalRequests">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Успешных</span>
+                    <span class="stat-value" style="color: #10b981" id="successRequests">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Ошибок</span>
+                    <span class="stat-value" style="color: #ef4444" id="errorRequests">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Среднее время</span>
+                    <span class="stat-value" id="avgTime">0ms</span>
+                </div>
+            </div>
+
+            <!-- Connection Info -->
+            <div class="card">
+                <h2>🔗 Подключение</h2>
+                <div class="stat">
+                    <span class="stat-label">Proxy URL</span>
+                    <span class="stat-value">localhost:3001</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Backend</span>
+                    <span class="stat-value">chiekenroads2.club</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Статус</span>
+                    <span class="badge badge-success">Connected</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Uptime</span>
+                    <span class="stat-value" id="uptime">00:00:00</span>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <h2>⚡ Быстрые действия</h2>
+                <div class="btn-group" style="flex-direction: column;">
+                    <button onclick="clearLogs()">🗑️ Очистить логи</button>
+                    <button onclick="restartServer()">🔄 Перезапустить</button>
+                    <button class="btn-danger" onclick="stopServer()">⏸️ Остановить</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modifications -->
+        <div class="grid">
+            <div class="card">
+                <h2>🎯 Модификации ответов</h2>
+                <div class="toggle-group">
+                    <div class="toggle-item">
+                        <label>Бесконечный баланс</label>
+                        <label class="switch">
+                            <input type="checkbox" id="infiniteBalance" onchange="toggleModification('balance', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label>Гарантированный выигрыш</label>
+                        <label class="switch">
+                            <input type="checkbox" id="autoWin" onchange="toggleModification('autowin', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label>Удвоить множители</label>
+                        <label class="switch">
+                            <input type="checkbox" id="doubleMultiplier" onchange="toggleModification('multiplier', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="toggle-item">
+                        <label>Фейковая история</label>
+                        <label class="switch">
+                            <input type="checkbox" id="fakeHistory" onchange="toggleModification('history', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ Настройки баланса</h2>
+                <div class="input-group">
+                    <label>Установить баланс (₹)</label>
+                    <input type="number" id="customBalance" placeholder="999999" value="1000000">
+                </div>
+                <div class="input-group">
+                    <label>Множитель выигрышей</label>
+                    <input type="number" id="winMultiplier" placeholder="2.0" value="1.0" step="0.1">
+                </div>
+                <button onclick="applySettings()">✅ Применить</button>
+            </div>
+
+            <div class="card">
+                <h2>📋 Активные эндпоинты</h2>
+                <div class="endpoint-list">
+                    <div class="endpoint-item">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span>/api/profile/:id</span>
+                        </div>
+                        <span class="badge badge-success">Active</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <div>
+                            <span class="endpoint-method method-post">POST</span>
+                            <span>/api/bet</span>
+                        </div>
+                        <span class="badge badge-success">Active</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <div>
+                            <span class="endpoint-method method-post">POST</span>
+                            <span>/api/cashout</span>
+                        </div>
+                        <span class="badge badge-success">Active</span>
+                    </div>
+                    <div class="endpoint-item">
+                        <div>
+                            <span class="endpoint-method method-get">GET</span>
+                            <span>/api/multiplier</span>
+                        </div>
+                        <span class="badge badge-success">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="card">
+            <h2>📝 Логи в реальном времени</h2>
+            <div class="logs" id="logsContainer">
+                <div class="log-entry">
+                    <span class="log-time">00:00:00</span>
+                    <span class="log-method">INFO</span>
+                    <span class="log-path">Proxy server started on port 3001</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fake data simulation
+        let totalRequests = 0;
+        let successRequests = 0;
+        let errorRequests = 0;
+        let startTime = Date.now();
+
+        // Simulate real-time logs
+        function addLog(method, path, status) {
+            const logsContainer = document.getElementById('logsContainer');
+            const time = new Date().toLocaleTimeString();
+            const statusClass = status >= 200 && status < 300 ? 'success' : 'error';
+
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `
+                <span class="log-time">${time}</span>
+                <span class="log-method">${method}</span>
+                <span class="log-path">${path}</span>
+                <span class="log-status ${statusClass}">${status}</span>
+            `;
+
+            logsContainer.insertBefore(logEntry, logsContainer.firstChild);
+
+            // Keep only last 20 logs
+            while (logsContainer.children.length > 20) {
+                logsContainer.removeChild(logsContainer.lastChild);
+            }
+
+            // Update stats
+            totalRequests++;
+            if (status >= 200 && status < 300) {
+                successRequests++;
+            } else {
+                errorRequests++;
+            }
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('totalRequests').textContent = totalRequests;
+            document.getElementById('successRequests').textContent = successRequests;
+            document.getElementById('errorRequests').textContent = errorRequests;
+            document.getElementById('avgTime').textContent = Math.floor(Math.random() * 200 + 50) + 'ms';
+        }
+
+        function updateUptime() {
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            document.getElementById('uptime').textContent =
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function toggleModification(type, enabled) {
+            console.log(`${type} modification:`, enabled ? 'enabled' : 'disabled');
+            addLog('CONFIG', `Toggle ${type}`, enabled ? 200 : 204);
+            alert(`Модификация "${type}" ${enabled ? 'включена' : 'выключена'}\n\nДля применения перезапустите proxy-server.js`);
+        }
+
+        function applySettings() {
+            const balance = document.getElementById('customBalance').value;
+            const multiplier = document.getElementById('winMultiplier').value;
+            console.log('Applied settings:', { balance, multiplier });
+            addLog('CONFIG', 'Settings updated', 200);
+            alert(`Настройки применены:\n- Баланс: ₹${balance}\n- Множитель: ${multiplier}x\n\nПерезапустите proxy-server.js`);
+        }
+
+        function clearLogs() {
+            const logsContainer = document.getElementById('logsContainer');
+            logsContainer.innerHTML = '<div class="log-entry"><span class="log-time">' +
+                new Date().toLocaleTimeString() + '</span><span class="log-method">INFO</span>' +
+                '<span class="log-path">Logs cleared</span></div>';
+        }
+
+        function restartServer() {
+            alert('⚠️ Для перезапуска выполните в терминале:\nnpm start');
+        }
+
+        function stopServer() {
+            if (confirm('Остановить proxy-сервер?')) {
+                alert('⚠️ Нажмите Ctrl+C в терминале где запущен сервер');
+            }
+        }
+
+        // Simulate random requests
+        const methods = ['GET', 'POST', 'PUT'];
+        const paths = ['/api/profile/123', '/api/bet', '/api/cashout', '/api/multiplier', '/api/bet_history'];
+
+        setInterval(() => {
+            const method = methods[Math.floor(Math.random() * methods.length)];
+            const path = paths[Math.floor(Math.random() * paths.length)];
+            const status = Math.random() > 0.1 ? 200 : 500;
+            addLog(method, path, status);
+        }, 3000);
+
+        // Update uptime every second
+        setInterval(updateUptime, 1000);
+    </script>
+</body>
+</html>
