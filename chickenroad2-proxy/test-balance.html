@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Balance Tester</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #334155;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        h1 { color: #10b981; }
+        button {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #059669;
+        }
+        .result {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #60a5fa; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #1e293b;
+            border: 2px solid #475569;
+            color: #e2e8f0;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Balance Tester</h1>
+        <p>Этот инструмент проверяет работу модификации баланса</p>
+
+        <label>User ID:</label>
+        <input type="text" id="userId" placeholder="Введите user ID" value="">
+
+        <label>Proxy URL:</label>
+        <input type="text" id="proxyUrl" value="http://localhost:3001">
+
+        <div>
+            <button onclick="testDirect()">1️⃣ Проверить прямой бэкенд</button>
+            <button onclick="testProxy()">2️⃣ Проверить через proxy</button>
+        </div>
+
+        <div>
+            <button onclick="getConfig()">⚙️ Получить конфигурацию</button>
+            <button onclick="enableInfiniteBalance()">💰 Включить бесконечный баланс</button>
+        </div>
+
+        <div class="result" id="result">Результаты появятся здесь...</div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://root.chiekenroads2.club/api';
+
+        function log(message, type = 'info') {
+            const result = document.getElementById('result');
+            const color = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            result.innerHTML += `<span class="${color}">[${new Date().toLocaleTimeString()}] ${message}</span>\n`;
+        }
+
+        function clear() {
+            document.getElementById('result').innerHTML = '';
+        }
+
+        async function testDirect() {
+            clear();
+            const userId = document.getElementById('userId').value;
+
+            if (!userId) {
+                log('❌ Введите User ID!', 'error');
+                return;
+            }
+
+            log('📡 Запрос к прямому бэкенду...', 'info');
+            log(`URL: ${BACKEND_URL}/profile/${userId}`, 'info');
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/profile/${userId}`);
+                const data = await response.json();
+
+                log('✅ Ответ получен:', 'success');
+                log(JSON.stringify(data, null, 2), 'info');
+
+                if (data.profile && data.profile.amount) {
+                    log(`💰 Баланс (прямой бэкенд): ${data.profile.amount}`, 'success');
+                }
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProxy() {
+            clear();
+            const userId = document.getElementById('userId').value;
+            const proxyUrl = document.getElementById('proxyUrl').value;
+
+            if (!userId) {
+                log('❌ Введите User ID!', 'error');
+                return;
+            }
+
+            log('📡 Запрос через proxy...', 'info');
+            log(`URL: ${proxyUrl}/api/profile/${userId}`, 'info');
+
+            try {
+                const response = await fetch(`${proxyUrl}/api/profile/${userId}`);
+                const data = await response.json();
+
+                log('✅ Ответ получен:', 'success');
+                log(JSON.stringify(data, null, 2), 'info');
+
+                if (data.profile && data.profile.amount) {
+                    log(`💰 Баланс (через proxy): ${data.profile.amount}`, 'success');
+                }
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error');
+                log('💡 Убедитесь что proxy-server запущен!', 'info');
+            }
+        }
+
+        async function getConfig() {
+            clear();
+            const proxyUrl = document.getElementById('proxyUrl').value;
+
+            log('📡 Получение конфигурации...', 'info');
+
+            try {
+                const response = await fetch(`${proxyUrl}/api/dashboard/config`);
+                const config = await response.json();
+
+                log('✅ Конфигурация получена:', 'success');
+                log(JSON.stringify(config, null, 2), 'info');
+                log(`\n⚙️ Infinite Balance: ${config.infiniteBalance}`, 'info');
+                log(`💰 Custom Balance: ${config.customBalance}`, 'info');
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+
+        async function enableInfiniteBalance() {
+            clear();
+            const proxyUrl = document.getElementById('proxyUrl').value;
+
+            log('📡 Включение бесконечного баланса...', 'info');
+
+            try {
+                // Включаем infinite balance
+                const response1 = await fetch(`${proxyUrl}/api/dashboard/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'infiniteBalance', value: true })
+                });
+
+                if (!response1.ok) throw new Error('Failed to enable');
+
+                // Устанавливаем баланс 999999
+                const response2 = await fetch(`${proxyUrl}/api/dashboard/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'customBalance', value: 1000 })
+                });
+
+                if (!response2.ok) throw new Error('Failed to set balance');
+
+                log('✅ Бесконечный баланс включен!', 'success');
+                log('💰 Баланс установлен: 999,999', 'success');
+                log('\n🔄 Теперь нажмите "Проверить через proxy"', 'info');
+            } catch (error) {
+                log(`❌ Ошибка: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-load userId from localStorage if available
+        window.onload = () => {
+            const userId = localStorage.getItem('userid');
+            if (userId) {
+                document.getElementById('userId').value = userId;
+                log('✅ User ID загружен из localStorage', 'success');
+            }
+        };
+    </script>
+</body>
+</html>

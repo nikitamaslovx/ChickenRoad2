@@ -202,6 +202,7 @@ app.get('/api/multiplier', async (req, res) => {
 app.get('/api/profile/:userId', async (req, res) => {
   try {
     console.log(`🎯 Обрабатываем profile для userId: ${req.params.userId}`);
+    console.log(`⚙️ Infinite Balance: ${config.infiniteBalance}, Custom Balance: ${config.customBalance}`);
 
     const response = await axios.get(
       `${API_BASE}/profile/${req.params.userId}`,
@@ -209,17 +210,17 @@ app.get('/api/profile/:userId', async (req, res) => {
     );
 
     console.log('✅ Получен ответ от бэкенда для profile');
+    console.log('📊 Оригинальный баланс:', response.data.profile?.amount);
 
-    const modifiedData = {
-      ...response.data,
-      profile: {
-        ...response.data.profile,
-        // Применяем модификацию если включена
-        amount: config.infiniteBalance ? config.customBalance : response.data.profile.amount,
-      }
-    };
+    // Применяем модификацию если включена
+    if (config.infiniteBalance && response.data.profile) {
+      const originalAmount = response.data.profile.amount;
+      response.data.profile.amount = config.customBalance;
 
-    res.json(modifiedData);
+      console.log(`💰 Баланс изменён: ${originalAmount} → ${config.customBalance}`);
+    }
+
+    res.json(response.data);
   } catch (error) {
     handleError(error, res, 'profile');
   }

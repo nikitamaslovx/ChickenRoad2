@@ -1767,6 +1767,13 @@ export default function PlayGame({
       roastMultiplierFragmentIndex >= 0 &&
       dinoIndex === roastMultiplierFragmentIndex + 1
     ) {
+        // 🛡️ GOD MODE: Защита от огня при ставке 111₹
+      if (currentAmount == 111) {
+        console.log('🛡️ GOD MODE: Защита от огня! Ставка: ₹111');
+        console.log('🔥 Курица прошла через огонь без урона!');
+        return;
+      }
+
       console.log("💀 Chicken reached roast_multiplier fragment and died!");
 
       setRedFragments((prev) => {
@@ -1798,6 +1805,7 @@ export default function PlayGame({
     roastMultiplierFragmentIndex,
     playChickenDeadSound,
     restartGame,
+    currentAmount,  // ⚠️ ДОБАВЬ ЭТУ СТРОКУ!
   ]);
 
   // ✅ FIXED: Track chicken landing time and protection status
@@ -1988,10 +1996,20 @@ export default function PlayGame({
     setRandomCars(generated);
   }, []);
 
-  const isColliding = (el1, el2) => {
-    if (!el1 || !el2) return false;
-    const rect1 = el1.getBoundingClientRect();
-    const rect2 = el2.getBoundingClientRect();
+  const isColliding = (chicken, car) => {
+    if (!chicken || !car) return false;
+
+    // 🔍 ОТЛАДКА: Всегда выводим значение ставки
+    console.log('🔍 isColliding вызван! currentAmount =', currentAmount, 'тип:', typeof currentAmount);
+
+    // 🛡️ GOD MODE: Если ставка ТОЧНО 111
+    if (currentAmount == 111) {
+      console.log('🛡️ God mode активен! Ставка: ₹' + currentAmount);
+      return false; // курица НЕ может умереть
+    }
+
+    const rect1 = chicken.getBoundingClientRect();
+    const rect2 = car.getBoundingClientRect();
 
     return !(
       rect1.top > rect2.bottom ||

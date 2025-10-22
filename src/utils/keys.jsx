@@ -1,1 +1,1 @@
-export const currency="$"
+export const currency="₸"

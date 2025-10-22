@@ -38,8 +38,8 @@ export default function Game() {
   const [activeFireIndex, setActiveFireIndex] = useState(null);
   const [islastSecondSegment, setIslastSecondSegment] = useState(false);
   const [cashoutIdByWhenByButton, setCashoutIdByWhenByButton] = useState(null);
-  const [toggleSound, setToggleSound] = useState(false);
-  const [toggleMusic, setToggleMusic] = useState(true);
+  const [toggleSound, setToggleSound] = useState(true);
+  const [toggleMusic, setToggleMusic] = useState(false);
   const [showWinModal, setShowWinModal] = useState(false);
   const [profileRefresher, setProfileRefresher] = useState(false);
   const [winAmount, setWinAmount] = useState(0);
